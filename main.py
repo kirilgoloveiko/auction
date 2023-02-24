@@ -27,7 +27,7 @@ def get_description(message):
     admin_input_lot['id'] = gen_lot_id()
     admin_input_lot['Описание'] = message.text
     bot.set_state(message.from_user.id, States.city, message.chat.id)
-    bot.send_message(message.chat.id, "Укажите город")
+    bot.send_message(message.chat.id, "Укажите гороlfdg")
 
 
 @bot.message_handler(state=States.city)
