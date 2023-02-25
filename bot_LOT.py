@@ -4,6 +4,7 @@ from telebot.types import InputMediaPhoto
 import json
 import random
 import telebot
+import time
 
 bot = telebot.TeleBot('5790530956:AAHR5gW3d7Z7K1NWj81Ycej8zf4rHYUYhr4')
 
@@ -46,19 +47,17 @@ lot = {
 def add_time(message):
     calendar, step = DetailedTelegramCalendar().build()
 
-    bot.send_message(message.chat.id, f"Select {LSTEP[step]}", reply_markup=calendar)
+    bot.send_message(message.chat.id, "Выберите дату публикации", reply_markup=calendar)
 
 def add_cost(message):
     if message.content_type == "text" and len(message.text) > 1:
         try:
             cost = int(message.text)
             lot["cost"] = cost
-            id_lots = gen_id(list_id_lots)
-            lot["id_lot"] = id_lots
-            with open('new_lots/'f'{id_lots}.json', 'w', encoding='utf-8') as f:
-                json.dump(lot, f, ensure_ascii=False, indent=4)
+            
+            bot.send_message(message.from_user.id, " Осталось выбрать время публикации лота")
+            add_time(message)
 
-            bot.send_message(message.from_user.id, "Покачто лот сформирован")
         except:
             msg = bot.send_message(message.from_user.id, "Что-то пошло не так, попробуйте еще раз")
             bot.register_next_step_handler(msg, add_cost)  
@@ -141,8 +140,22 @@ def answer(call):
                               call.message.message_id,
                               reply_markup=key)
     elif result:
+        time1 =str(result) + " 12:00"
+        f = "%Y-%m-%d %H:%M"
+        time1 = time.strptime(time1,f)
+        # print(time1)
+        time1 = str(time.mktime(time1))
+        time2 = (str(float(time1)+86400))
+        
+        lot["start_time"] = time1
+        lot["finish_time"] = time2
 
-        bot.edit_message_text(f"You selected {result}",
+        id_lots = gen_id(list_id_lots)
+        lot["id_lot"] = id_lots
+        with open('new_lots/'f'{id_lots}.json', 'w', encoding='utf-8') as f:
+            json.dump(lot, f, ensure_ascii=False, indent=4)
+
+        bot.edit_message_text(" Лот успешно создан! ",
                               call.message.chat.id,
                               call.message.message_id)
 
