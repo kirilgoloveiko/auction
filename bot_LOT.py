@@ -31,14 +31,14 @@ def gen_id(lst):
 '''
 lot = {
     "id_admin": "id", +
-    "id_lot": "id_lot",-
-    "mas_photos": ["photo1", "photo2"],
-    "description": "описание",
-    "city" : "город",
-    "delivery": "условия доставки",
-    "cost": "цена",
-    "start_time": "старт публикации",
-    "finish_time": "конец аукциона"
+    "id_lot": "id_lot", +
+    "mas_photos": id_photo1, +
+    "description": "описание", +
+    "city" : "город", +
+    "delivery": "условия доставки", +
+    "cost": "цена", +
+    "start_time": "старт публикации", -
+    "finish_time": "конец аукциона" -
 }
 '''
 
@@ -50,25 +50,23 @@ def add_time(message):
 
 def add_cost(message):
     if message.content_type == "text" and len(message.text) > 1:
-        lot["cost"] = message.text
-        id_lots = gen_id(list_id_lots)
-        lot["id_lot"] = id_lots
-        with open(f'{id_lots}.json', 'w', encoding='utf-8') as f:
-            json.dump(lot, f, ensure_ascii=False, indent=4)
+        try:
+            cost = int(message.text)
+            lot["cost"] = cost
+            id_lots = gen_id(list_id_lots)
+            lot["id_lot"] = id_lots
+            with open('new_lots/'f'{id_lots}.json', 'w', encoding='utf-8') as f:
+                json.dump(lot, f, ensure_ascii=False, indent=4)
 
-        bot.send_message(message.from_user.id, "Покачто лот сформирован")
-
-        # add_time(message)
-        # for x,y in lot.items():
-        #     print(x,"  ",y)
-    else:
-        msg = bot.send_message(message.from_user.id, "Что-то пошло не так, попробуйте еще раз")
-        bot.register_next_step_handler(msg, add_cost)  
+            bot.send_message(message.from_user.id, "Покачто лот сформирован")
+        except:
+            msg = bot.send_message(message.from_user.id, "Что-то пошло не так, попробуйте еще раз")
+            bot.register_next_step_handler(msg, add_cost)  
 
 def add_delivery(message):
     if message.content_type == "text" and len(message.text) > 1:
         lot["delivery"] = message.text
-        msg = bot.send_message(message.from_user.id, "Укажите стартовую цену лота")
+        msg = bot.send_message(message.from_user.id, "Укажите стартовую цену лота в рублях (100/ 200/ 5000)")
         bot.register_next_step_handler(msg, add_cost)
     else:
         msg = bot.send_message(message.from_user.id, "Что-то пошло не так, попробуйте еще раз")
@@ -107,10 +105,7 @@ def add_photo(message):
         bot.register_next_step_handler(msg, add_photo)
 
     elif  message.content_type =="photo":
-        lot["mas_photos"] = []
-        if len(lot["mas_photos"]) <= 8 :
-            lot["mas_photos"].append(message.photo[-1].file_id)
-
+        lot["mas_photos"] = message.photo[-1].file_id
         msg = bot.send_message(message.from_user.id, "Хорошо! Теперь добавьте описание ")
         bot.register_next_step_handler(msg, add_description)
 
